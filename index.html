@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      background: #ADD8E6;
       padding: 20px;
     }
 
@@ -51,7 +51,7 @@
     }
 
     .table {
-      background: #e6e6e6;
+      background: #FFC0CB;
       padding: 10px;
       border: 4px solid #444;
       display: grid;
@@ -99,7 +99,7 @@
 <div class="tables" id="tables"></div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbycQ_UGCjJBcQFsbRri3f2ieKTkG5uG4TZI1rS9HDZTcKX5bK2enINd_Q7HLqrKjejERA/exec";
+const API = "https://script.google.com/macros/s/AKfycbwLdpj_OnorUIW_ohCIXFomWh44DDYZtahLB70D_6Sr66OmqyONRvlxZ0MF5G7dGWZDjg/exec";
 const TABLE_COUNT = 5;
 const SEATS_PER_SIDE = 30;
 
@@ -211,6 +211,62 @@ guestContainer.addEventListener("drop", e => {
     })
   });
 });
+
+/* ===============================
+   AUTO-SCROLL VED DRAGGING
+================================= */
+const SCROLL_ZONE = 80;   // px fra topp/bunn
+const SCROLL_SPEED = 15; // px per tick
+
+document.addEventListener("dragover", e => {
+  const y = e.clientY;
+  const height = window.innerHeight;
+
+  // Scroll opp
+  if (y < SCROLL_ZONE) {
+    window.scrollBy(0, -SCROLL_SPEED);
+  }
+
+  // Scroll ned
+  if (y > height - SCROLL_ZONE) {
+    window.scrollBy(0, SCROLL_SPEED);
+  }
+});
+
+/* ===============================
+   DROP PÅ BAKGRUNN = FJERN FRA BORD
+================================= */
+document.body.addEventListener("dragover", e => {
+  e.preventDefault();
+});
+
+document.body.addEventListener("drop", e => {
+  e.preventDefault();
+
+  // Hvis vi slipper på et sete eller gjestelista, gjør ingenting her
+  if (e.target.closest(".seat") || e.target.closest("#guests")) {
+    return;
+  }
+
+  const id = e.dataTransfer.getData("id");
+  const guestEl = document.querySelector(`.guest[data-id="${id}"]`);
+  if (!guestEl) return;
+
+  // Flytt gjesten tilbake til gjestelista
+  const guestContainer = document.getElementById("guests");
+  guestContainer.prepend(guestEl);
+
+  // Oppdater Sheets: ingen bord / ingen stol
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      id: id,
+      table: "",
+      seatId: ""
+    })
+  });
+});
+
 </script>
 
 </body>
