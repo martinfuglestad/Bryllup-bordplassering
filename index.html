@@ -1,89 +1,73 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2487.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  <meta charset="UTF-8">
+  <title>Bordplassering</title>
+  <style>
+    body { font-family: sans-serif; }
+    .guest {
+      padding: 6px 10px;
+      border: 1px solid #333;
+      margin: 4px;
+      display: inline-block;
+      cursor: grab;
+      background: #eee;
+    }
+    .table {
+      width: 200px;
+      height: 200px;
+      border: 2px dashed #666;
+      margin: 10px;
+      display: inline-block;
+      vertical-align: top;
+    }
   </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Bordplassering&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>body { font-family: sans-serif; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.guest {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 6px 10px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid #333;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin: 4px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: inline-block;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>cursor: grab;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: #eee;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.table {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 200px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 200px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border: 2px dashed #666;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: inline-block;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>vertical-align: top;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;h3&gt;Gjester&lt;/h3&gt;</p>
-<p class="p1">&lt;div id="guests"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;h3&gt;Bord&lt;/h3&gt;</p>
-<p class="p1">&lt;div class="table" data-table="1"&gt;Bord 1&lt;/div&gt;</p>
-<p class="p1">&lt;div class="table" data-table="2"&gt;Bord 2&lt;/div&gt;</p>
-<p class="p1">&lt;div class="table" data-table="3"&gt;Bord 3&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">const API = "LIM_INN_WEBAPP_URL_HER";</p>
-<p class="p2"><br></p>
-<p class="p1">fetch(API)</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.then(r =&gt; r.json())</p>
-<p class="p1"><span class="Apple-converted-space">  </span>.then(data =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const container = document.getElementById("guests");</p>
-<p class="p1"><span class="Apple-converted-space">    </span>data.forEach(g =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const el = document.createElement("div");</p>
-<p class="p1"><span class="Apple-converted-space">      </span>el.className = "guest";</p>
-<p class="p1"><span class="Apple-converted-space">      </span>el.textContent = g.name;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>el.draggable = true;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>el.dataset.id = g.id;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>el.addEventListener("dragstart", e =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>e.dataTransfer.setData("id", g.id);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>});</p>
-<p class="p1"><span class="Apple-converted-space">      </span>container.appendChild(el);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p2"><br></p>
-<p class="p1">document.querySelectorAll(".table").forEach(t =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>t.addEventListener("dragover", e =&gt; e.preventDefault());</p>
-<p class="p1"><span class="Apple-converted-space">  </span>t.addEventListener("drop", e =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const id = e.dataTransfer.getData("id");</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const table = t.dataset.table;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>fetch(API, {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>method: "POST",</p>
-<p class="p1"><span class="Apple-converted-space">      </span>body: JSON.stringify({ id, table })</p>
-<p class="p1"><span class="Apple-converted-space">    </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>alert("Plassert på bord " + table);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p1">});</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+<h3>Gjester</h3>
+<div id="guests"></div>
+
+<h3>Bord</h3>
+<div class="table" data-table="1">Bord 1</div>
+<div class="table" data-table="2">Bord 2</div>
+<div class="table" data-table="3">Bord 3</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbzkvVA7b050GKpx0mXLwwGUXs16VnUNqRE4QiA1asEmaLyI9pm55NtmYSZdslozAtDc7A/exec";
+
+fetch(API)
+  .then(r => r.json())
+  .then(data => {
+    const container = document.getElementById("guests");
+    data.forEach(g => {
+      const el = document.createElement("div");
+      el.className = "guest";
+      el.textContent = g.name;
+      el.draggable = true;
+      el.dataset.id = g.id;
+      el.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("id", g.id);
+      });
+      container.appendChild(el);
+    });
+  });
+
+document.querySelectorAll(".table").forEach(t => {
+  t.addEventListener("dragover", e => e.preventDefault());
+  t.addEventListener("drop", e => {
+    const id = e.dataTransfer.getData("id");
+    const table = t.dataset.table;
+
+    fetch(API, {
+      method: "POST",
+      body: JSON.stringify({ id, table })
+    });
+
+    alert("Plassert på bord " + table);
+  });
+});
+</script>
+
 </body>
 </html>
