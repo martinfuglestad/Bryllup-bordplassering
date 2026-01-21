@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="no">
 <head>
   <meta charset="UTF-8">
@@ -12,11 +12,12 @@
     }
 
     h2 {
-      margin-top: 40px;
+      margin: 30px 0 10px;
     }
 
+    /* ===== Gjesteliste ===== */
     #guests {
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
 
     .guest {
@@ -27,38 +28,40 @@
       cursor: grab;
       background: #fff;
       font-size: 12px;
+      white-space: nowrap;
     }
 
+    /* ===== Bordområde ===== */
     .tables {
       display: flex;
-      gap: 40px;
-      flex-wrap: nowrap;
-      overflow-x: auto;
+      gap: 80px;
+      align-items: flex-start;
+    }
+
+    .table-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .table-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+      text-align: center;
     }
 
     .table {
       background: #e6e6e6;
       padding: 10px;
       border: 4px solid #444;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: auto auto;
       gap: 6px;
     }
 
-    .table-title {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .side {
-      display: flex;
-      gap: 4px;
-    }
-
     .seat {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border: 1px dashed #999;
       background: #fafafa;
       display: flex;
@@ -69,18 +72,24 @@
     .seat .guest {
       width: 100%;
       height: 100%;
-      margin: 0;
       padding: 0;
+      margin: 0;
       font-size: 9px;
+      text-align: center;
       display: flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
       background: #dff0ff;
       border: 1px solid #555;
     }
+
+    /* Skjul seter som evt havner i gjestelista */
+    #guests .seat:empty {
+      display: none;
+    }
   </style>
 </head>
+
 <body>
 
 <h2>Gjester</h2>
@@ -90,35 +99,33 @@
 <div class="tables" id="tables"></div>
 
 <script>
-/* ===============================
-   KONFIGURASJON
-================================= */
-const API = "https://script.google.com/macros/s/AKfycbzkvVA7b050GKpx0mXLwwGUXs16VnUNqRE4QiA1asEmaLyI9pm55NtmYSZdslozAtDc7A/exec";
+const API = "https://script.google.com/macros/s/AKfycbycQ_UGCjJBcQFsbRri3f2ieKTkG5uG4TZI1rS9HDZTcKX5bK2enINd_Q7HLqrKjejERA/exec";
 const TABLE_COUNT = 5;
 const SEATS_PER_SIDE = 30;
 
-/* ===============================
-   LAG BORD + SETER
-================================= */
+/* ===== LAG BORD OG SETER ===== */
 const tablesContainer = document.getElementById("tables");
 
 for (let t = 1; t <= TABLE_COUNT; t++) {
-  const table = document.createElement("div");
-  table.className = "table";
-  table.dataset.table = t;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "table-wrapper";
 
   const title = document.createElement("div");
   title.className = "table-title";
   title.textContent = "Bord " + t;
-  table.appendChild(title);
 
-  ["top", "bottom"].forEach(sideName => {
-    const side = document.createElement("div");
-    side.className = "side " + sideName;
+  const table = document.createElement("div");
+  table.className = "table";
+  table.dataset.table = t;
 
-    for (let i = 0; i < SEATS_PER_SIDE; i++) {
+  for (let i = 0; i < SEATS_PER_SIDE; i++) {
+    ["top", "bottom"].forEach(sideName => {
       const seat = document.createElement("div");
       seat.className = "seat";
+
+      const seatId = `bord-${t}-${sideName}-${i + 1}`;
+      seat.dataset.seatId = seatId;
 
       seat.addEventListener("dragover", e => e.preventDefault());
 
@@ -127,33 +134,30 @@ for (let t = 1; t <= TABLE_COUNT; t++) {
 
         const id = e.dataTransfer.getData("id");
         const guestEl = document.querySelector(`.guest[data-id="${id}"]`);
-
         if (!guestEl) return;
 
-        seat.innerHTML = "";
         seat.appendChild(guestEl);
 
         fetch(API, {
           method: "POST",
           body: JSON.stringify({
             id: id,
-            table: table.dataset.table
+            table: t,
+            seatId: seatId
           })
         });
       });
 
-      side.appendChild(seat);
-    }
+      table.appendChild(seat);
+    });
+  }
 
-    table.appendChild(side);
-  });
-
-  tablesContainer.appendChild(table);
+  wrapper.appendChild(title);
+  wrapper.appendChild(table);
+  tablesContainer.appendChild(wrapper);
 }
 
-/* ===============================
-   LAST GJESTER FRA SHEETS
-================================= */
+/* ===== LAST GJESTER ===== */
 fetch(API)
   .then(r => r.json())
   .then(data => {
@@ -170,9 +174,43 @@ fetch(API)
         e.dataTransfer.setData("id", g.id);
       });
 
+      if (g.seatId) {
+        const seatEl = document.querySelector(
+          `.seat[data-seat-id="${g.seatId}"]`
+        );
+        if (seatEl) {
+          seatEl.appendChild(el);
+          return;
+        }
+      }
+
       container.appendChild(el);
     });
   });
+
+/* ===== DRA TILBAKE TIL GJESTELISTA ===== */
+const guestContainer = document.getElementById("guests");
+
+guestContainer.addEventListener("dragover", e => e.preventDefault());
+
+guestContainer.addEventListener("drop", e => {
+  e.preventDefault();
+
+  const id = e.dataTransfer.getData("id");
+  const guestEl = document.querySelector(`.guest[data-id="${id}"]`);
+  if (!guestEl) return;
+
+  guestContainer.prepend(guestEl);
+
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      id: id,
+      table: "",
+      seatId: ""
+    })
+  });
+});
 </script>
 
 </body>
