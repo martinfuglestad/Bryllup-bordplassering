@@ -120,7 +120,7 @@ for (let t = 1; t <= TABLE_COUNT; t++) {
   table.dataset.table = t;
 
   for (let i = 0; i < SEATS_PER_SIDE; i++) {
-    ["top", "bottom"].forEach(sideName => {
+    ["L", "R"].forEach(sideName => {
       const seat = document.createElement("div");
       seat.className = "seat";
 
