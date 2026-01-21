@@ -1,72 +1,178 @@
-<!DOCTYPE html>
-<html>
+<<!DOCTYPE html>
+<html lang="no">
 <head>
   <meta charset="UTF-8">
   <title>Bordplassering</title>
+
   <style>
-    body { font-family: sans-serif; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 40px;
+    }
+
+    #guests {
+      margin-bottom: 30px;
+    }
+
     .guest {
       padding: 6px 10px;
       border: 1px solid #333;
       margin: 4px;
       display: inline-block;
       cursor: grab;
-      background: #eee;
+      background: #fff;
+      font-size: 12px;
     }
+
+    .tables {
+      display: flex;
+      gap: 40px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+
     .table {
-      width: 200px;
-      height: 200px;
-      border: 2px dashed #666;
-      margin: 10px;
-      display: inline-block;
-      vertical-align: top;
+      background: #e6e6e6;
+      padding: 10px;
+      border: 4px solid #444;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .table-title {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .side {
+      display: flex;
+      gap: 4px;
+    }
+
+    .seat {
+      width: 30px;
+      height: 30px;
+      border: 1px dashed #999;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .seat .guest {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-size: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: #dff0ff;
+      border: 1px solid #555;
     }
   </style>
 </head>
 <body>
 
-<h3>Gjester</h3>
+<h2>Gjester</h2>
 <div id="guests"></div>
 
-<h3>Bord</h3>
-<div class="table" data-table="1">Bord 1</div>
-<div class="table" data-table="2">Bord 2</div>
-<div class="table" data-table="3">Bord 3</div>
+<h2>Bordplassering</h2>
+<div class="tables" id="tables"></div>
 
 <script>
+/* ===============================
+   KONFIGURASJON
+================================= */
 const API = "https://script.google.com/macros/s/AKfycbzkvVA7b050GKpx0mXLwwGUXs16VnUNqRE4QiA1asEmaLyI9pm55NtmYSZdslozAtDc7A/exec";
+const TABLE_COUNT = 5;
+const SEATS_PER_SIDE = 30;
 
+/* ===============================
+   LAG BORD + SETER
+================================= */
+const tablesContainer = document.getElementById("tables");
+
+for (let t = 1; t <= TABLE_COUNT; t++) {
+  const table = document.createElement("div");
+  table.className = "table";
+  table.dataset.table = t;
+
+  const title = document.createElement("div");
+  title.className = "table-title";
+  title.textContent = "Bord " + t;
+  table.appendChild(title);
+
+  ["top", "bottom"].forEach(sideName => {
+    const side = document.createElement("div");
+    side.className = "side " + sideName;
+
+    for (let i = 0; i < SEATS_PER_SIDE; i++) {
+      const seat = document.createElement("div");
+      seat.className = "seat";
+
+      seat.addEventListener("dragover", e => e.preventDefault());
+
+      seat.addEventListener("drop", e => {
+        e.preventDefault();
+
+        const id = e.dataTransfer.getData("id");
+        const guestEl = document.querySelector(`.guest[data-id="${id}"]`);
+
+        if (!guestEl) return;
+
+        seat.innerHTML = "";
+        seat.appendChild(guestEl);
+
+        fetch(API, {
+          method: "POST",
+          body: JSON.stringify({
+            id: id,
+            table: table.dataset.table
+          })
+        });
+      });
+
+      side.appendChild(seat);
+    }
+
+    table.appendChild(side);
+  });
+
+  tablesContainer.appendChild(table);
+}
+
+/* ===============================
+   LAST GJESTER FRA SHEETS
+================================= */
 fetch(API)
   .then(r => r.json())
   .then(data => {
     const container = document.getElementById("guests");
+
     data.forEach(g => {
       const el = document.createElement("div");
       el.className = "guest";
       el.textContent = g.name;
       el.draggable = true;
       el.dataset.id = g.id;
+
       el.addEventListener("dragstart", e => {
         e.dataTransfer.setData("id", g.id);
       });
+
       container.appendChild(el);
     });
   });
-
-document.querySelectorAll(".table").forEach(t => {
-  t.addEventListener("dragover", e => e.preventDefault());
-  t.addEventListener("drop", e => {
-    const id = e.dataTransfer.getData("id");
-    const table = t.dataset.table;
-
-    fetch(API, {
-      method: "POST",
-      body: JSON.stringify({ id, table })
-    });
-
-    alert("Plassert på bord " + table);
-  });
-});
 </script>
 
 </body>
