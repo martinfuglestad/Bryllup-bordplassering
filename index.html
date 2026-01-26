@@ -1,93 +1,91 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-  <meta charset="UTF-8">
-  <title>Bordplassering</title>
+<meta charset="UTF-8">
+<title>Bordplassering</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #ADD8E6;
-      padding: 20px;
-    }
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#ADD8E6;
+  padding:20px;
+}
 
-    h2 {
-      margin: 30px 0 10px;
-    }
+h2{ margin:30px 0 10px; }
 
-    /* ===== Gjesteliste ===== */
-    #guests {
-      margin-bottom: 40px;
-    }
+#guests{ margin-bottom:40px; }
 
-    .guest {
-      padding: 6px 10px;
-      border: 1px solid #333;
-      margin: 4px;
-      display: inline-block;
-      cursor: grab;
-      background: #fff;
-      font-size: 12px;
-      white-space: nowrap;
-    }
+.guest{
+  padding:6px 10px;
+  border:1px solid #333;
+  margin:4px;
+  display:inline-block;
+  cursor:grab;
+  background:#fff;
+  font-size:12px;
+  white-space:nowrap;
+}
 
-    /* ===== Bordområde ===== */
-    .tables {
-      display: flex;
-      gap: 80px;
-      align-items: flex-start;
-    }
+/* ===== ROM ===== */
+.tables{
+  position:relative;
+  height:2500px;
+}
 
-    .table-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+.table-wrapper{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  transform-origin:center center;
+}
 
-    .table-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-      text-align: center;
-    }
+.table-title{
+  font-weight:bold;
+  margin-bottom:6px;
+}
 
-    .table {
-      background: #FFC0CB;
-      padding: 10px;
-      border: 4px solid #444;
-      display: grid;
-      grid-template-columns: auto auto;
-      gap: 6px;
-    }
+/* ===== BORD ===== */
+.table{
+  background:#FFC0CB;
+  padding:10px;
+  border:4px solid #444;
 
-    .seat {
-      width: 28px;
-      height: 28px;
-      border: 1px dashed #999;
-      background: #fafafa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  display:grid;
+  grid-template-columns: 36px 36px;
+  grid-auto-rows: 36px;
+  gap:6px;
+}
 
-    .seat .guest {
-      width: 100%;
-      height: 100%;
-      padding: 0;
-      margin: 0;
-      font-size: 9px;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #dff0ff;
-      border: 1px solid #555;
-    }
+/* ===== STOL ===== */
+.seat{
+  border:1px dashed #999;
+  background:#fafafa;
+}
 
-    /* Skjul seter som evt havner i gjestelista */
-    #guests .seat:empty {
-      display: none;
-    }
-  </style>
+/* ===== NAVN I STOL ===== */
+.seat .guest{
+  box-sizing:border-box;
+
+  width:36px;
+  height:36px;
+
+  padding:3px;
+  border:1px solid #555;
+  background:#dff0ff;
+
+  font-size:9px;
+  line-height:1.1;
+
+  white-space:normal;
+  word-break:break-word;
+
+  position:relative;
+  top:-5px;
+  left:-5px;
+}
+
+</style>
 </head>
 
 <body>
@@ -99,174 +97,144 @@
 <div class="tables" id="tables"></div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbwLdpj_OnorUIW_ohCIXFomWh44DDYZtahLB70D_6Sr66OmqyONRvlxZ0MF5G7dGWZDjg/exec";
-const TABLE_COUNT = 5;
-const SEATS_PER_SIDE = 30;
+const API = "https://script.google.com/macros/s/AKfycbwWgZferc0FqUduSbu-PqSEX4yARsNtFzHVUXXXLmHDa248vHUhUhOWChKMUDJWGXfdwQ/exec";
+const CELL_SIZE = 36;
 
-/* ===== LAG BORD OG SETER ===== */
-const tablesContainer = document.getElementById("tables");
+/* ================= ROM ================= */
+function drawRoom(room, tableProps){
+  const container = document.getElementById("tables");
+  container.innerHTML = "";
 
-for (let t = 1; t <= TABLE_COUNT; t++) {
+  room.forEach((row,r)=>{
+    row.forEach((cell,c)=>{
+      if(!cell) return;
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "table-wrapper";
+      const info = tableProps[cell] || {rotation:0,seats:30};
 
-  const title = document.createElement("div");
-  title.className = "table-title";
-  title.textContent = "Bord " + t;
+      const wrapper = document.createElement("div");
+      wrapper.className="table-wrapper";
+      wrapper.style.left = c*CELL_SIZE+"px";
+      wrapper.style.top  = r*CELL_SIZE+"px";
+      wrapper.style.transform = `rotate(${info.rotation}deg)`;
 
-  const table = document.createElement("div");
-  table.className = "table";
-  table.dataset.table = t;
+      const title = document.createElement("div");
+      title.className="table-title";
+      title.textContent="Bord "+cell;
 
-  for (let i = 0; i < SEATS_PER_SIDE; i++) {
-    ["L", "R"].forEach(sideName => {
-      const seat = document.createElement("div");
-      seat.className = "seat";
+      const table = document.createElement("div");
+      table.className="table";
 
-      const seatId = `bord-${t}-${sideName}-${i + 1}`;
-      seat.dataset.seatId = seatId;
+      /* ===== VENSTRE SIDE FØRST ===== */
+      for(let i=0;i<info.seats;i++){
+        const seat=document.createElement("div");
+        seat.className="seat";
 
-      seat.addEventListener("dragover", e => e.preventDefault());
+        const seatId=`bord-${cell}-L-${i+1}`;
+        seat.dataset.seatId=seatId;
 
-      seat.addEventListener("drop", e => {
-        e.preventDefault();
-
-        const id = e.dataTransfer.getData("id");
-        const guestEl = document.querySelector(`.guest[data-id="${id}"]`);
-        if (!guestEl) return;
-
-        seat.appendChild(guestEl);
-
-        fetch(API, {
-          method: "POST",
-          body: JSON.stringify({
-            id: id,
-            table: t,
-            seatId: seatId
-          })
-        });
-      });
-
-      table.appendChild(seat);
-    });
-  }
-
-  wrapper.appendChild(title);
-  wrapper.appendChild(table);
-  tablesContainer.appendChild(wrapper);
-}
-
-/* ===== LAST GJESTER ===== */
-fetch(API)
-  .then(r => r.json())
-  .then(data => {
-    const container = document.getElementById("guests");
-
-    data.forEach(g => {
-      const el = document.createElement("div");
-      el.className = "guest";
-      el.textContent = g.name;
-      el.draggable = true;
-      el.dataset.id = g.id;
-
-      el.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("id", g.id);
-      });
-
-      if (g.seatId) {
-        const seatEl = document.querySelector(
-          `.seat[data-seat-id="${g.seatId}"]`
-        );
-        if (seatEl) {
-          seatEl.appendChild(el);
-          return;
-        }
+        enableSeatDrop(seat, cell, seatId);
+        table.appendChild(seat);
       }
 
-      container.appendChild(el);
+      /* ===== HØYRE SIDE ===== */
+      for(let i=0;i<info.seats;i++){
+        const seat=document.createElement("div");
+        seat.className="seat";
+
+        const seatId=`bord-${cell}-R-${i+1}`;
+        seat.dataset.seatId=seatId;
+
+        enableSeatDrop(seat, cell, seatId);
+        table.appendChild(seat);
+      }
+
+      wrapper.appendChild(title);
+      wrapper.appendChild(table);
+      container.appendChild(wrapper);
     });
   });
+}
 
-/* ===== DRA TILBAKE TIL GJESTELISTA ===== */
-const guestContainer = document.getElementById("guests");
+/* ================= DROP PÅ STOL ================= */
+function enableSeatDrop(seat, table, seatId){
+  seat.addEventListener("dragover",e=>e.preventDefault());
 
-guestContainer.addEventListener("dragover", e => e.preventDefault());
+  seat.addEventListener("drop",e=>{
+    e.preventDefault();
 
-guestContainer.addEventListener("drop", e => {
-  e.preventDefault();
+    const id=e.dataTransfer.getData("id");
+    const guest=document.querySelector(`.guest[data-id="${id}"]`);
+    if(!guest) return;
 
-  const id = e.dataTransfer.getData("id");
-  const guestEl = document.querySelector(`.guest[data-id="${id}"]`);
-  if (!guestEl) return;
+    seat.appendChild(guest);
 
-  guestContainer.prepend(guestEl);
+    fetch(API,{
+      method:"POST",
+      body:JSON.stringify({id,table,seatId})
+    });
+  });
+}
 
-  fetch(API, {
-    method: "POST",
-    body: JSON.stringify({
-      id: id,
-      table: "",
-      seatId: ""
-    })
+/* ================= GJESTER ================= */
+function drawGuests(guests){
+  const container=document.getElementById("guests");
+
+  guests.forEach(g=>{
+    const el=document.createElement("div");
+    el.className="guest";
+    el.textContent=g.name;
+    el.draggable=true;
+    el.dataset.id=g.id;
+
+    el.addEventListener("dragstart",e=>{
+      e.dataTransfer.setData("id",g.id);
+    });
+
+    if(g.seatId){
+      const seat=document.querySelector(`.seat[data-seat-id="${g.seatId}"]`);
+      if(seat){
+        seat.appendChild(el);
+        return;
+      }
+    }
+
+    container.appendChild(el);
+  });
+}
+
+/* ================= AUTO SCROLL ================= */
+document.addEventListener("dragover",e=>{
+  const y=e.clientY;
+  const h=window.innerHeight;
+  if(y<80) window.scrollBy(0,-15);
+  if(y>h-80) window.scrollBy(0,15);
+});
+
+/* ================= SLIPP PÅ BAKGRUNN ================= */
+document.body.addEventListener("dragover",e=>e.preventDefault());
+
+document.body.addEventListener("drop",e=>{
+  if(e.target.closest(".seat")||e.target.closest("#guests")) return;
+
+  const id=e.dataTransfer.getData("id");
+  const guest=document.querySelector(`.guest[data-id="${id}"]`);
+  if(!guest) return;
+
+  document.getElementById("guests").prepend(guest);
+
+  fetch(API,{
+    method:"POST",
+    body:JSON.stringify({id,table:"",seatId:""})
   });
 });
 
-/* ===============================
-   AUTO-SCROLL VED DRAGGING
-================================= */
-const SCROLL_ZONE = 80;   // px fra topp/bunn
-const SCROLL_SPEED = 15; // px per tick
-
-document.addEventListener("dragover", e => {
-  const y = e.clientY;
-  const height = window.innerHeight;
-
-  // Scroll opp
-  if (y < SCROLL_ZONE) {
-    window.scrollBy(0, -SCROLL_SPEED);
-  }
-
-  // Scroll ned
-  if (y > height - SCROLL_ZONE) {
-    window.scrollBy(0, SCROLL_SPEED);
-  }
-});
-
-/* ===============================
-   DROP PÅ BAKGRUNN = FJERN FRA BORD
-================================= */
-document.body.addEventListener("dragover", e => {
-  e.preventDefault();
-});
-
-document.body.addEventListener("drop", e => {
-  e.preventDefault();
-
-  // Hvis vi slipper på et sete eller gjestelista, gjør ingenting her
-  if (e.target.closest(".seat") || e.target.closest("#guests")) {
-    return;
-  }
-
-  const id = e.dataTransfer.getData("id");
-  const guestEl = document.querySelector(`.guest[data-id="${id}"]`);
-  if (!guestEl) return;
-
-  // Flytt gjesten tilbake til gjestelista
-  const guestContainer = document.getElementById("guests");
-  guestContainer.prepend(guestEl);
-
-  // Oppdater Sheets: ingen bord / ingen stol
-  fetch(API, {
-    method: "POST",
-    body: JSON.stringify({
-      id: id,
-      table: "",
-      seatId: ""
-    })
+/* ================= HENT DATA ================= */
+fetch(API)
+  .then(r=>r.json())
+  .then(data=>{
+    drawRoom(data.room, data.tables);
+    drawGuests(data.guests);
   });
-});
-
 </script>
 
 </body>
